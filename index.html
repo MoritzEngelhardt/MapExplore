@@ -3,182 +3,124 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Knowledge Village — an exploration game</title>
+<title>Knowledge Realms — an exploration game</title>
 <style>
   :root{
-    --paper:#fbf3e2;
-    --paper-2:#f4e7cd;
-    --ink:#3a2c22;
-    --ink-soft:#7a6552;
-    --line:#e0cda7;
-    --accent:#4e8d3f;
-    --accent-dark:#3a6b2f;
-    --gold:#e0a52e;
+    --paper:#fbf3e2; --paper-2:#f4e7cd; --ink:#3a2c22; --ink-soft:#7a6552;
+    --line:#e0cda7; --accent:#4e8d3f; --accent-dark:#3a6b2f; --gold:#e0a52e;
     --shadow:rgba(58,44,34,.22);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;height:100%;}
   body{
     font-family:"Verdana","Geneva",sans-serif;
-    background:
-      radial-gradient(120% 120% at 50% -10%, #cfe9b6 0%, #a7cf86 45%, #7fae6a 100%);
-    color:var(--ink);
-    display:flex;align-items:center;justify-content:center;
-    min-height:100%;padding:18px;
-    -webkit-tap-highlight-color:transparent;
+    background:radial-gradient(120% 120% at 50% -10%,#cfe9b6 0%,#a7cf86 45%,#7fae6a 100%);
+    color:var(--ink);display:flex;align-items:center;justify-content:center;
+    min-height:100%;padding:18px;-webkit-tap-highlight-color:transparent;
   }
   .frame{
-    width:min(820px,100%);
-    background:var(--paper);
-    border:3px solid var(--ink);
-    border-radius:22px;
-    box-shadow:0 18px 0 -4px var(--accent-dark), 0 26px 50px var(--shadow);
-    overflow:hidden;
-    position:relative;
+    width:min(820px,100%);background:var(--paper);border:3px solid var(--ink);
+    border-radius:22px;box-shadow:0 18px 0 -4px var(--accent-dark),0 26px 50px var(--shadow);
+    overflow:hidden;position:relative;
   }
-  /* ---- Top bar ---- */
-  .topbar{
-    display:flex;align-items:center;gap:14px;
-    padding:12px 16px;
-    background:linear-gradient(180deg,var(--paper-2),var(--paper));
-    border-bottom:3px solid var(--line);
-  }
-  .crest{
-    width:38px;height:38px;border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #fbe19a, var(--gold));
-    border:3px solid var(--ink);
-    display:grid;place-items:center;font-size:20px;flex:none;
-  }
-  .titles h1{
-    font-family:Georgia,"Times New Roman",serif;
-    font-size:19px;margin:0;letter-spacing:.3px;line-height:1;
-  }
+  .topbar{display:flex;align-items:center;gap:14px;padding:12px 16px;
+    background:linear-gradient(180deg,var(--paper-2),var(--paper));border-bottom:3px solid var(--line);}
+  .crest{width:38px;height:38px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#fbe19a,var(--gold));
+    border:3px solid var(--ink);display:grid;place-items:center;font-size:20px;flex:none;}
+  .titles h1{font-family:Georgia,"Times New Roman",serif;font-size:19px;margin:0;letter-spacing:.3px;line-height:1;}
   .titles p{margin:2px 0 0;font-size:11px;color:var(--ink-soft);letter-spacing:.4px;}
-  .progress{
-    margin-left:auto;display:flex;align-items:center;gap:10px;
-  }
-  .pill{
-    background:var(--paper);border:2px solid var(--ink);
-    border-radius:999px;padding:6px 12px;font-size:12px;font-weight:bold;
-    display:flex;align-items:center;gap:6px;
-  }
-  .btn{
-    cursor:pointer;border:2px solid var(--ink);background:var(--paper);
-    border-radius:12px;padding:8px 12px;font-weight:bold;font-size:13px;
-    font-family:inherit;color:var(--ink);
-    box-shadow:0 3px 0 var(--ink);transition:transform .06s, box-shadow .06s;
-  }
+  .progress{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .pill{background:var(--paper);border:2px solid var(--ink);border-radius:999px;
+    padding:6px 12px;font-size:12px;font-weight:bold;display:flex;align-items:center;gap:6px;}
+  .btn{cursor:pointer;border:2px solid var(--ink);background:var(--paper);border-radius:12px;
+    padding:8px 12px;font-weight:bold;font-size:13px;font-family:inherit;color:var(--ink);
+    box-shadow:0 3px 0 var(--ink);transition:transform .06s,box-shadow .06s;}
   .btn:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink);}
   .btn.accent{background:var(--accent);color:#fff;box-shadow:0 3px 0 var(--accent-dark);}
   .btn.accent:active{box-shadow:0 0 0 var(--accent-dark);}
 
-  /* ---- Stage ---- */
   .stage{position:relative;background:#86b56b;}
-  canvas{display:block;width:100%;height:auto;image-rendering:auto;}
+  canvas{display:block;width:100%;height:auto;}
 
-  .prompt{
-    position:absolute;left:50%;bottom:84px;transform:translateX(-50%);
-    background:rgba(58,44,34,.9);color:#fff;
-    padding:9px 16px;border-radius:999px;font-size:13px;white-space:nowrap;
-    border:2px solid #fff;box-shadow:0 6px 14px var(--shadow);
-    animation:bob 1.4s ease-in-out infinite;
-  }
-  .prompt b{color:#ffd874;}
+  .region-label{position:absolute;left:12px;top:12px;background:rgba(58,44,34,.82);color:#fff;
+    font-size:12px;font-weight:bold;padding:6px 12px;border-radius:999px;border:2px solid #fff;
+    display:flex;gap:8px;align-items:center;pointer-events:none;}
+  .banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.9);
+    font-family:Georgia,serif;font-size:30px;font-weight:bold;color:#fff;
+    text-shadow:0 3px 0 var(--ink),0 6px 16px rgba(0,0,0,.4);opacity:0;pointer-events:none;
+    transition:opacity .5s,transform .5s;white-space:nowrap;}
+  .banner.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+  .banner small{display:block;font-family:Verdana,sans-serif;font-size:12px;font-weight:normal;
+    letter-spacing:3px;text-transform:uppercase;margin-top:4px;text-shadow:0 2px 4px rgba(0,0,0,.5);}
+
+  .prompt{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);
+    background:rgba(58,44,34,.9);color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;
+    white-space:nowrap;border:2px solid #fff;box-shadow:0 6px 14px var(--shadow);
+    animation:fb 1.4s ease-in-out infinite;}
+  .prompt b{color:#ffd874;} .prompt.locked{background:rgba(120,40,40,.92);} .prompt.locked b{color:#ffd0d0;}
   .prompt.hidden{display:none;}
-  @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-4px);}}
+  @keyframes fb{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-4px);}}
 
-  /* ---- Touch controls ---- */
-  .controls{
-    position:absolute;inset:auto 0 0 0;
-    display:flex;justify-content:space-between;align-items:flex-end;
-    padding:14px 18px;pointer-events:none;
-  }
+  .controls{position:absolute;inset:auto 0 0 0;display:flex;justify-content:space-between;
+    align-items:flex-end;padding:14px 18px;pointer-events:none;}
   .dpad{display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:4px;pointer-events:auto;}
-  .dpad button{
-    border:2px solid var(--ink);background:rgba(251,243,226,.9);border-radius:12px;
-    font-size:18px;font-weight:bold;color:var(--ink);cursor:pointer;
-    box-shadow:0 3px 0 var(--ink);user-select:none;touch-action:none;
-  }
+  .dpad button{border:2px solid var(--ink);background:rgba(251,243,226,.9);border-radius:12px;
+    font-size:18px;font-weight:bold;color:var(--ink);cursor:pointer;box-shadow:0 3px 0 var(--ink);
+    user-select:none;touch-action:none;}
   .dpad button:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink);}
   .dpad .u{grid-area:1/2;}.dpad .l{grid-area:2/1;}.dpad .r{grid-area:2/3;}.dpad .d{grid-area:3/2;}
-  .actionbtn{
-    pointer-events:auto;width:74px;height:74px;border-radius:50%;
-    border:3px solid var(--ink);background:var(--accent);color:#fff;
-    font-size:13px;font-weight:bold;cursor:pointer;box-shadow:0 4px 0 var(--accent-dark);
-    user-select:none;touch-action:none;align-self:center;
-  }
+  .actionbtn{pointer-events:auto;width:74px;height:74px;border-radius:50%;border:3px solid var(--ink);
+    background:var(--accent);color:#fff;font-size:13px;font-weight:bold;cursor:pointer;
+    box-shadow:0 4px 0 var(--accent-dark);user-select:none;touch-action:none;align-self:center;}
   .actionbtn:active{transform:translateY(4px);box-shadow:0 0 0 var(--accent-dark);}
 
-  /* ---- Modals ---- */
-  .scrim{
-    position:absolute;inset:0;background:rgba(40,28,18,.55);
-    display:flex;align-items:center;justify-content:center;padding:20px;
-    z-index:20;backdrop-filter:blur(2px);
-  }
+  .scrim{position:absolute;inset:0;background:rgba(40,28,18,.55);display:flex;align-items:center;
+    justify-content:center;padding:20px;z-index:20;backdrop-filter:blur(2px);}
   .scrim.hidden{display:none;}
-  .card{
-    width:min(420px,100%);background:var(--paper);
-    border:3px solid var(--ink);border-radius:18px;overflow:hidden;
-    box-shadow:0 20px 40px rgba(0,0,0,.4);
-    animation:pop .26s cubic-bezier(.2,1.4,.5,1);
-  }
+  .card{width:min(420px,100%);background:var(--paper);border:3px solid var(--ink);border-radius:18px;
+    overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.4);animation:pop .26s cubic-bezier(.2,1.4,.5,1);}
   @keyframes pop{from{transform:scale(.85) translateY(10px);opacity:0;}to{transform:scale(1);opacity:1;}}
-  .card-head{
-    padding:22px;color:#fff;text-align:center;position:relative;
-  }
-  .card-head .badge{
-    position:absolute;top:12px;right:14px;background:rgba(255,255,255,.9);
-    color:var(--accent-dark);font-size:11px;font-weight:bold;
-    padding:4px 9px;border-radius:999px;border:2px solid #fff;
-  }
+  .card-head{padding:22px;color:#fff;text-align:center;position:relative;}
+  .card-head .badge{position:absolute;top:12px;right:14px;background:rgba(255,255,255,.9);
+    color:var(--accent-dark);font-size:11px;font-weight:bold;padding:4px 9px;border-radius:999px;border:2px solid #fff;}
   .card-icon{font-size:54px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3));}
   .card-head h2{font-family:Georgia,serif;margin:10px 0 0;font-size:24px;}
+  .card-head .place{font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.85;margin-top:4px;}
   .card-body{padding:20px 22px 8px;font-size:14.5px;line-height:1.6;color:var(--ink);}
   .card-foot{padding:8px 22px 22px;text-align:center;}
 
-  /* ---- Journal ---- */
-  .journal{
-    width:min(560px,100%);max-height:88%;overflow:auto;background:var(--paper);
-    border:3px solid var(--ink);border-radius:18px;
-    box-shadow:0 20px 40px rgba(0,0,0,.4);animation:pop .26s cubic-bezier(.2,1.4,.5,1);
-  }
-  .journal-head{
-    padding:16px 20px;border-bottom:3px solid var(--line);
-    display:flex;align-items:center;gap:10px;
-    background:linear-gradient(180deg,var(--paper-2),var(--paper));position:sticky;top:0;
-  }
-  .journal-head h2{font-family:Georgia,serif;margin:0;font-size:20px;}
-  .journal-head .x{margin-left:auto;}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:18px;}
-  .tile{
-    border:2px solid var(--ink);border-radius:14px;padding:14px;text-align:center;
-    background:#fff;cursor:pointer;transition:transform .08s;
-  }
+  .journal{width:min(580px,100%);max-height:88%;overflow:auto;background:var(--paper);
+    border:3px solid var(--ink);border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.4);
+    animation:pop .26s cubic-bezier(.2,1.4,.5,1);}
+  .journal-head{padding:16px 20px;border-bottom:3px solid var(--line);display:flex;align-items:center;gap:10px;
+    background:linear-gradient(180deg,var(--paper-2),var(--paper));position:sticky;top:0;}
+  .journal-head h2{font-family:Georgia,serif;margin:0;font-size:20px;}.journal-head .x{margin-left:auto;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:18px;}
+  .tile{border:2px solid var(--ink);border-radius:14px;padding:14px;text-align:center;background:#fff;
+    cursor:pointer;transition:transform .08s;}
   .tile:hover{transform:translateY(-2px);}
   .tile.locked{background:var(--paper-2);cursor:default;color:var(--ink-soft);border-style:dashed;}
   .tile .ic{font-size:34px;line-height:1.1;}
-  .tile h3{font-size:13.5px;margin:8px 0 0;font-family:Georgia,serif;}
+  .tile h3{font-size:13.5px;margin:8px 0 2px;font-family:Georgia,serif;}
   .tile small{font-size:10.5px;color:var(--ink-soft);}
 
-  .toast{
-    position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-80px);
-    background:var(--gold);color:var(--ink);font-weight:bold;font-size:13px;
-    padding:10px 18px;border-radius:999px;border:2px solid var(--ink);z-index:30;
-    box-shadow:0 8px 18px var(--shadow);transition:transform .4s cubic-bezier(.2,1.3,.5,1);
-  }
+  .toast{position:absolute;top:14px;left:50%;transform:translateX(-50%) translateY(-80px);
+    background:var(--gold);color:var(--ink);font-weight:bold;font-size:13px;padding:10px 18px;
+    border-radius:999px;border:2px solid var(--ink);z-index:30;box-shadow:0 8px 18px var(--shadow);
+    transition:transform .4s cubic-bezier(.2,1.3,.5,1);}
   .toast.show{transform:translateX(-50%) translateY(0);}
-
   .hint{font-size:11px;color:var(--ink-soft);text-align:center;padding:8px;border-top:3px solid var(--line);}
-  @media(max-width:540px){ .titles p,.hint{display:none;} .titles h1{font-size:16px;} }
+  @media(max-width:540px){.titles p,.hint{display:none;}.titles h1{font-size:16px;}.banner{font-size:22px;}}
 </style>
 </head>
 <body>
 <div class="frame">
   <div class="topbar">
-    <div class="crest">🏡</div>
+    <div class="crest">🗺️</div>
     <div class="titles">
-      <h1>Knowledge Village</h1>
-      <p>Explore the meadow · enter the cottages · collect every card</p>
+      <h1>Knowledge Realms</h1>
+      <p>Six themed regions · find each hidden key · unlock each hut</p>
     </div>
     <div class="progress">
       <div class="pill">📜 <span id="count">0</span> / <span id="total">0</span></div>
@@ -188,6 +130,8 @@
 
   <div class="stage">
     <canvas id="canvas" width="768" height="528"></canvas>
+    <div class="region-label" id="regionLabel">📍 …</div>
+    <div class="banner" id="banner"></div>
     <div class="prompt hidden" id="prompt"></div>
 
     <div class="controls">
@@ -200,158 +144,186 @@
       <button class="actionbtn" id="actionBtn">ENTER</button>
     </div>
 
-    <div class="toast" id="toast">New card discovered!</div>
+    <div class="toast" id="toast"></div>
 
-    <!-- Card modal -->
     <div class="scrim hidden" id="cardScrim">
       <div class="card">
         <div class="card-head" id="cardHead">
           <div class="badge" id="cardBadge">New!</div>
           <div class="card-icon" id="cardIcon">☀️</div>
           <h2 id="cardTitle">Title</h2>
+          <div class="place" id="cardPlace"></div>
         </div>
         <div class="card-body" id="cardText">…</div>
         <div class="card-foot"><button class="btn accent" id="cardClose">Got it!</button></div>
       </div>
     </div>
 
-    <!-- Journal modal -->
     <div class="scrim hidden" id="journalScrim">
       <div class="journal">
         <div class="journal-head">
-          <span style="font-size:22px">📖</span>
-          <h2>Your Journal</h2>
+          <span style="font-size:22px">📖</span><h2>Your Journal</h2>
           <button class="btn x" id="journalClose">Close</button>
         </div>
         <div class="grid" id="journalGrid"></div>
       </div>
     </div>
 
-    <!-- Intro -->
     <div class="scrim" id="introScrim">
       <div class="card">
         <div class="card-head" style="background:linear-gradient(135deg,#4e8d3f,#6fae57)">
-          <div class="card-icon">🧭</div>
-          <h2>Welcome, explorer!</h2>
+          <div class="card-icon">🧭</div><h2>Welcome, explorer!</h2>
         </div>
         <div class="card-body">
-          A quiet village rests in the meadow. Each cottage holds a card about
-          <b id="topicName">a topic</b>. Walk up to a cottage and step inside to
-          collect its card, then revisit them anytime in your Journal.
+          The land is divided into <b>six regions</b>, each shaped by a different kind of
+          <b id="topicName">power</b>. Every region hides a <b>hut</b> — and a <b>🔑 key</b>.
+          You must find the region's key before its hut will open and give up its card.
           <br><br>
-          <b>Move:</b> Arrow keys / WASD (or the on-screen pad)<br>
-          <b>Enter a cottage:</b> press <b>E</b> (or the ENTER button)<br>
+          <b>Move:</b> Arrow keys / WASD (or the pad)<br>
+          <b>Pick up a key:</b> just walk over it<br>
+          <b>Enter a hut:</b> press <b>E</b> (or ENTER)<br>
           <b>Journal:</b> press <b>M</b>
         </div>
-        <div class="card-foot"><button class="btn accent" id="introClose">Start exploring →</button></div>
+        <div class="card-foot"><button class="btn accent" id="introClose">Begin the journey →</button></div>
       </div>
     </div>
   </div>
 
-  <div class="hint">Tip: roofs are colour-coded to hint at what each cottage contains.</div>
+  <div class="hint">Tip: keys are small and glint in the light — explore each region's interior to spot them.</div>
 </div>
 
 <script>
 /* =====================================================================
-   1) CONTENT  —  edit this array to change the whole game's topic.
-   Each entry becomes one cottage on the map and one collectible card.
-   gx / gy = the cottage's top-left grid position (cols 0–25, rows 0–19).
+   1) CONTENT — edit these six regions to change the whole game.
+   Each region = one theme, one hut, one hidden key, one info card.
+   theme controls the look: desert|highlands|wetland|volcanic|farmland|coast
+   col/row place the region in the 3x2 world grid.
+   hut/key are positions INSIDE the region (local tiles, 0..15 x 0..11).
    ===================================================================== */
 const TOPIC = "Renewable Energy";
-const CARDS = [
-  { id:'solar', title:'Solar Power', icon:'☀️', color:'#e8a33d',
-    text:'Solar panels turn sunlight straight into electricity using photovoltaic cells. The sun delivers more energy to Earth in one hour than humanity uses in a whole year.',
-    gx:4,  gy:4 },
-  { id:'wind', title:'Wind Power', icon:'🌬️', color:'#5aa7c9',
-    text:'Wind turbines spin as moving air pushes their blades, driving a generator. A single large turbine can power roughly a thousand homes.',
-    gx:12, gy:3 },
-  { id:'hydro', title:'Hydropower', icon:'💧', color:'#3f7fb8',
-    text:'Flowing or falling water turns turbines inside dams. It is the oldest and still the largest source of renewable electricity worldwide.',
-    gx:20, gy:5 },
-  { id:'geo', title:'Geothermal', icon:'🌋', color:'#c2603f',
-    text:'Heat from deep inside the Earth warms water into steam that spins turbines. Iceland heats most of its buildings this way.',
-    gx:5,  gy:13 },
-  { id:'bio', title:'Biomass', icon:'🌾', color:'#9a8233',
-    text:'Plant matter and organic waste can be burned or fermented for energy. Because new plants regrow, the carbon can roughly balance out.',
-    gx:13, gy:14 },
-  { id:'tidal', title:'Tidal Power', icon:'🌊', color:'#2f9e8f',
-    text:'The daily rise and fall of the tides moves underwater turbines. Tides are extremely predictable, making the output easy to plan for.',
-    gx:21, gy:13 },
+const REGIONS = [
+  { id:'solar', col:0,row:0, name:'Sun Dunes', theme:'desert',
+    hut:{x:12,y:8}, key:{x:3,y:3},
+    card:{ title:'Solar Power', icon:'☀️', color:'#e8a33d',
+      text:'Solar panels turn sunlight straight into electricity using photovoltaic cells. The sun delivers more energy to Earth in a single hour than humanity uses in a whole year.' } },
+  { id:'wind', col:1,row:0, name:'Gale Highlands', theme:'highlands',
+    hut:{x:3,y:9}, key:{x:12,y:2},
+    card:{ title:'Wind Power', icon:'🌬️', color:'#5aa7c9',
+      text:'Wind turbines spin as moving air pushes their blades, driving a generator. One large modern turbine can power roughly a thousand homes.' } },
+  { id:'hydro', col:2,row:0, name:'The Riverlands', theme:'wetland',
+    hut:{x:12,y:3}, key:{x:4,y:9},
+    card:{ title:'Hydropower', icon:'💧', color:'#3f7fb8',
+      text:'Flowing or falling water turns turbines inside dams. It is the oldest and still the single largest source of renewable electricity worldwide.' } },
+  { id:'geo', col:0,row:1, name:'Ember Crags', theme:'volcanic',
+    hut:{x:4,y:3}, key:{x:12,y:9},
+    card:{ title:'Geothermal Energy', icon:'🌋', color:'#c2603f',
+      text:'Heat from deep inside the Earth boils water into steam that spins turbines. Iceland heats almost all of its buildings this way.' } },
+  { id:'bio', col:1,row:1, name:'Harvest Fields', theme:'farmland',
+    hut:{x:12,y:9}, key:{x:3,y:2},
+    card:{ title:'Biomass', icon:'🌾', color:'#9a8233',
+      text:'Plant matter and organic waste can be burned or fermented for energy. Because new crops regrow, the released carbon can roughly balance out.' } },
+  { id:'tidal', col:2,row:1, name:'Tide Shore', theme:'coast',
+    hut:{x:3,y:3}, key:{x:12,y:5},
+    card:{ title:'Tidal Power', icon:'🌊', color:'#2f9e8f',
+      text:'The daily rise and fall of the tides drives underwater turbines. Tides are extremely predictable, which makes the output easy to plan around.' } },
 ];
 
 /* =====================================================================
-   2) WORLD SETUP
+   2) WORLD BUILD
    ===================================================================== */
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const VIEW_W = canvas.width, VIEW_H = canvas.height;
-const TILE = 48, COLS = 26, ROWS = 20;
-const WORLD_W = COLS*TILE, WORLD_H = ROWS*TILE;
-const GRASS=0, TREE=1, WATER=2, PATH=3, FLOWER=4;
-const START = { gx:12, gy:9 };
-const key = (c,r)=>c+','+r;
+const canvas=document.getElementById('canvas'), ctx=canvas.getContext('2d');
+const VIEW_W=canvas.width, VIEW_H=canvas.height;
+const TILE=48, REG_W=16, REG_H=12, GRID_COLS=3, GRID_ROWS=2;
+const COLS=REG_W*GRID_COLS, ROWS=REG_H*GRID_ROWS;          // 48 x 24
+const WORLD_W=COLS*TILE, WORLD_H=ROWS*TILE;
+const GROUND=0, OBSTACLE=1, LIQUID=2, PATH=3, DECO=4;
+const START={ gx:24, gy:12 };
+const key=(c,r)=>c+','+r;
+const isRoad=(c,r)=> c===16||c===32||r===12;
 
-// terrain + a per-tile random shade for texture
+// region lookup grid
+const regionGrid=[];
+for(let gc=0;gc<GRID_COLS;gc++){ regionGrid[gc]=[]; }
+REGIONS.forEach(reg=>{ regionGrid[reg.col][reg.row]=reg; });
+function regionAt(c,r){
+  const gc=Math.min(GRID_COLS-1,Math.floor(c/REG_W));
+  const gr=Math.min(GRID_ROWS-1,Math.floor(r/REG_H));
+  return regionGrid[gc][gr];
+}
+
+// terrain + per-tile shade
 const terrain=[], shade=[];
 for(let r=0;r<ROWS;r++){ terrain[r]=[]; shade[r]=[];
-  for(let c=0;c<COLS;c++){ terrain[r][c]=GRASS; shade[r][c]=Math.random(); } }
+  for(let c=0;c<COLS;c++){ terrain[r][c]=GROUND; shade[r][c]=Math.random(); } }
 
-// houses derived from CARDS (2x2 footprint each)
-const solidHouse = new Set();
-const houses = CARDS.map(card=>({
-  card, hx:card.gx, hy:card.gy,
-  // interaction point sits just in front of the door (centre-bottom)
-  doorPx:{ x:(card.gx+1)*TILE, y:(card.gy+2)*TILE + TILE*0.25 }
-}));
-houses.forEach(h=>{ for(let dx=0;dx<2;dx++) for(let dy=0;dy<2;dy++) solidHouse.add(key(h.hx+dx,h.hy+dy)); });
+// derive huts & keys in world coords
+const solidHouse=new Set();
+const huts=[], keyPoints=[];
+REGIONS.forEach(reg=>{
+  const ox=reg.col*REG_W, oy=reg.row*REG_H;
+  const hx=ox+reg.hut.x, hy=oy+reg.hut.y;
+  huts.push({ reg, hx, hy, doorPx:{ x:(hx+1)*TILE, y:(hy+2)*TILE+TILE*0.25 } });
+  for(let dx=0;dx<2;dx++) for(let dy=0;dy<2;dy++) solidHouse.add(key(hx+dx,hy+dy));
+  const kx=ox+reg.key.x, ky=oy+reg.key.y;
+  keyPoints.push({ regId:reg.id, name:reg.name, gx:kx, gy:ky, px:{ x:kx*TILE+TILE/2, y:ky*TILE+TILE/2 } });
+});
 
-// reserve clear ground around houses + the starting plaza (no trees/water there)
-const reserved = new Set();
-houses.forEach(h=>{ for(let dx=-1;dx<3;dx++) for(let dy=-1;dy<4;dy++) reserved.add(key(h.hx+dx,h.hy+dy)); });
+// reserved tiles (kept clear of obstacles/liquid)
+const reserved=new Set();
+huts.forEach(h=>{ for(let dx=-1;dx<3;dx++) for(let dy=-1;dy<4;dy++) reserved.add(key(h.hx+dx,h.hy+dy)); });
+keyPoints.forEach(k=>{ for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) reserved.add(key(k.gx+dx,k.gy+dy)); });
 for(let dx=-2;dx<=2;dx++) for(let dy=-2;dy<=2;dy++) reserved.add(key(START.gx+dx,START.gy+dy));
+const isReserved=(c,r)=>reserved.has(key(c,r));
 
-// carve walkable paths from the plaza to every cottage door
-function carve(c,r){ if(c>=0&&r>=0&&c<COLS&&r<ROWS&&!solidHouse.has(key(c,r))) terrain[r][c]=PATH; }
-function carvePath(c0,r0,c1,r1){
-  let c=c0,r=r0;
-  while(c!==c1){ carve(c,r); c+=c1>c?1:-1; }
-  while(r!==r1){ carve(c,r); r+=r1>r?1:-1; }
-  carve(c,r);
-}
-houses.forEach(h=>{ carvePath(START.gx,START.gy,h.hx,h.hy+2); carve(h.hx+1,h.hy+2); });
-for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) carve(START.gx+dx,START.gy+dy);
+// liquids (water / lava) per theme
+function setLiquid(c,r){ if(c>=0&&r>=0&&c<COLS&&r<ROWS&&!isReserved(c,r)&&!isRoad(c,r)&&terrain[r][c]===GROUND) terrain[r][c]=LIQUID; }
+function blob(cc,rr,rx,ry){ for(let r=rr-ry;r<=rr+ry;r++) for(let c=cc-rx;c<=cc+rx;c++){
+  const dx=(c-cc)/rx, dy=(r-rr)/ry; if(dx*dx+dy*dy<=1) setLiquid(c,r); } }
+REGIONS.forEach(reg=>{
+  const ox=reg.col*REG_W, oy=reg.row*REG_H;
+  if(reg.theme==='wetland') blob(ox+8,oy+6,4,3);
+  else if(reg.theme==='volcanic'){ blob(ox+8,oy+7,2,2); }
+  else if(reg.theme==='coast'){ for(let r=oy+REG_H-4;r<oy+REG_H;r++) for(let c=ox;c<ox+REG_W;c++) setLiquid(c,r); }
+});
 
-// a small decorative pond, tucked out of the way
-for(let c=16;c<=18;c++) for(let r=2;r<=3;r++)
-  if(!reserved.has(key(c,r)) && terrain[r][c]!==PATH){ terrain[r][c]=WATER; reserved.add(key(c,r)); }
+// obstacles (theme decor) — denser near the world edge to frame the map
+REGIONS.forEach(reg=>{
+  const ox=reg.col*REG_W, oy=reg.row*REG_H;
+  for(let r=oy;r<oy+REG_H;r++) for(let c=ox;c<ox+REG_W;c++){
+    if(terrain[r][c]!==GROUND||isReserved(c,r)||isRoad(c,r)) continue;
+    const edge=(c===0||r===0||c===COLS-1||r===ROWS-1);
+    if(Math.random()<(edge?0.42:0.11)) terrain[r][c]=OBSTACLE;
+  }
+});
 
-// scatter trees (denser near the edges to frame the meadow) then flowers
+// roads connecting the regions (cleared corridors)
+for(let r=0;r<ROWS;r++){ terrain[r][16]=PATH; terrain[r][32]=PATH; }
+for(let c=0;c<COLS;c++){ terrain[12][c]=PATH; }
+// roads must not overwrite hut footprints (they don't, but guard anyway)
+solidHouse.forEach(s=>{ const [c,r]=s.split(',').map(Number); if(terrain[r][c]===PATH) terrain[r][c]=GROUND; });
+
+// walkable ground decoration
 for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-  if(terrain[r][c]!==GRASS || reserved.has(key(c,r))) continue;
-  const edge = c<=1||r<=1||c>=COLS-2||r>=ROWS-2;
-  if(Math.random() < (edge?0.55:0.07)) terrain[r][c]=TREE;
-}
-for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
-  if(terrain[r][c]===GRASS && !reserved.has(key(c,r)) && Math.random()<0.07) terrain[r][c]=FLOWER;
+  if(terrain[r][c]===GROUND && !isReserved(c,r) && !isRoad(c,r) && Math.random()<0.10) terrain[r][c]=DECO;
 }
 
 function isSolid(c,r){
   if(c<0||r<0||c>=COLS||r>=ROWS) return true;
   const t=terrain[r][c];
-  return t===TREE || t===WATER || solidHouse.has(key(c,r));
+  return t===OBSTACLE || t===LIQUID || solidHouse.has(key(c,r));
 }
 
 /* =====================================================================
    3) PLAYER + INPUT
    ===================================================================== */
-const player = { x:START.gx*TILE+12, y:START.gy*TILE+12, w:24, h:30, speed:178, dir:'down', moving:false, bob:0 };
-const keys = {};
-let paused = true;          // intro is open at start
-let nearHouse = null;
-const collected = new Set();
+const player={ x:START.gx*TILE+12, y:START.gy*TILE+10, w:24, h:30, speed:182, dir:'down', moving:false, bob:0 };
+const keys={}; let paused=true, nearHut=null, time=0;
+const collected=new Set();   // card ids
+const keysFound=new Set();   // region ids whose key is picked up
+let currentRegion=null;
 
-const keymap = {ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',
-                w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
+const keymap={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',
+  w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
 addEventListener('keydown',e=>{
   if(keymap[e.key]){ keys[keymap[e.key]]=true; e.preventDefault(); }
   else if(e.key==='e'||e.key==='E') interact();
@@ -359,39 +331,46 @@ addEventListener('keydown',e=>{
   else if(e.key==='Escape') closeAll();
 });
 addEventListener('keyup',e=>{ if(keymap[e.key]) keys[keymap[e.key]]=false; });
-
-// on-screen controls
 document.querySelectorAll('.dpad button').forEach(b=>{
   const dir=b.dataset.dir;
-  const on =e=>{e.preventDefault();keys[dir]=true;};
-  const off=e=>{e.preventDefault();keys[dir]=false;};
+  const on=e=>{e.preventDefault();keys[dir]=true;}, off=e=>{e.preventDefault();keys[dir]=false;};
   b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off);
   b.addEventListener('pointerleave',off); b.addEventListener('pointercancel',off);
 });
 document.getElementById('actionBtn').addEventListener('click',interact);
 
 /* =====================================================================
-   4) UPDATE  (movement, collision, proximity)
+   4) UPDATE
    ===================================================================== */
 function update(dt){
   if(paused){ player.moving=false; return; }
   let dx=0,dy=0;
   if(keys.up)dy--; if(keys.down)dy++; if(keys.left)dx--; if(keys.right)dx++;
-  player.moving = !!(dx||dy);
+  player.moving=!!(dx||dy);
   if(player.moving){
     if(dy<0)player.dir='up'; else if(dy>0)player.dir='down';
     else if(dx<0)player.dir='left'; else if(dx>0)player.dir='right';
     const len=Math.hypot(dx,dy)||1; dx/=len; dy/=len;
-    moveAxis(dx*player.speed*dt, 0);
-    moveAxis(0, dy*player.speed*dt);
-    player.bob += dt*11;
+    moveAxis(dx*player.speed*dt,0); moveAxis(0,dy*player.speed*dt);
+    player.bob+=dt*11;
   } else player.bob=0;
+
+  const px=player.x+player.w/2, py=player.y+player.h/2;
+  // pick up keys
+  for(const k of keyPoints){
+    if(!keysFound.has(k.regId) && Math.hypot(px-k.px.x,py-k.px.y)<30){
+      keysFound.add(k.regId); toast('🔑 Found the '+k.name+' key!'); updateRegionLabel();
+    }
+  }
+  // region change → banner
+  const reg=regionAt(Math.floor(px/TILE),Math.floor(py/TILE));
+  if(reg!==currentRegion){ currentRegion=reg; showBanner(reg); updateRegionLabel(); }
   refreshPrompt();
 }
 function moveAxis(ax,ay){
   player.x+=ax; player.y+=ay;
   const left=Math.floor(player.x/TILE), right=Math.floor((player.x+player.w-1)/TILE);
-  const top =Math.floor(player.y/TILE), bottom=Math.floor((player.y+player.h-1)/TILE);
+  const top=Math.floor(player.y/TILE), bottom=Math.floor((player.y+player.h-1)/TILE);
   if(ax>0){ for(let r=top;r<=bottom;r++) if(isSolid(right,r)){ player.x=right*TILE-player.w; break; } }
   else if(ax<0){ for(let r=top;r<=bottom;r++) if(isSolid(left,r)){ player.x=(left+1)*TILE; break; } }
   if(ay>0){ for(let c=left;c<=right;c++) if(isSolid(c,bottom)){ player.y=bottom*TILE-player.h; break; } }
@@ -399,17 +378,16 @@ function moveAxis(ax,ay){
 }
 function refreshPrompt(){
   const px=player.x+player.w/2, py=player.y+player.h/2;
-  nearHouse=null; let best=72;
-  for(const h of houses){
-    const d=Math.hypot(px-h.doorPx.x, py-h.doorPx.y);
-    if(d<best){ best=d; nearHouse=h; }
-  }
+  nearHut=null; let best=74;
+  for(const h of huts){ const d=Math.hypot(px-h.doorPx.x,py-h.doorPx.y); if(d<best){ best=d; nearHut=h; } }
   const p=document.getElementById('prompt');
-  if(nearHouse && !paused){
+  p.classList.remove('locked');
+  if(nearHut && !paused){
     p.classList.remove('hidden');
-    p.innerHTML = collected.has(nearHouse.card.id)
-      ? `Press <b>E</b> to revisit <b>${nearHouse.card.title}</b>`
-      : `Press <b>E</b> to enter <b>${nearHouse.card.title}</b>`;
+    const has=keysFound.has(nearHut.reg.id), done=collected.has(nearHut.reg.card.title);
+    if(!has){ p.classList.add('locked'); p.innerHTML=`🔒 Locked — find the <b>${nearHut.reg.name}</b> key`; }
+    else if(done) p.innerHTML=`Press <b>E</b> to revisit <b>${nearHut.reg.card.title}</b>`;
+    else p.innerHTML=`Press <b>E</b> to enter the hut`;
   } else p.classList.add('hidden');
 }
 
@@ -418,217 +396,291 @@ function refreshPrompt(){
    ===================================================================== */
 function camera(){
   let cx=player.x+player.w/2-VIEW_W/2, cy=player.y+player.h/2-VIEW_H/2;
-  cx=Math.max(0,Math.min(cx,WORLD_W-VIEW_W));
-  cy=Math.max(0,Math.min(cy,WORLD_H-VIEW_H));
+  cx=Math.max(0,Math.min(cx,WORLD_W-VIEW_W)); cy=Math.max(0,Math.min(cy,WORLD_H-VIEW_H));
   return {cx,cy};
 }
-let time=0;
 function render(){
   const {cx,cy}=camera();
   const c0=Math.max(0,Math.floor(cx/TILE)), r0=Math.max(0,Math.floor(cy/TILE));
   const c1=Math.min(COLS,Math.ceil((cx+VIEW_W)/TILE)), r1=Math.min(ROWS,Math.ceil((cy+VIEW_H)/TILE));
-
-  // ground first (grass / path / water / flowers / trees)
   for(let r=r0;r<r1;r++) for(let c=c0;c<c1;c++) drawTile(c,r,c*TILE-cx,r*TILE-cy);
-
-  // houses + player share a depth-sorted pass so the figure can pass behind/in-front
-  const items=[...houses.map(h=>({y:(h.hy+2)*TILE, draw:()=>drawHouse(h,cx,cy)})),
-               {y:player.y+player.h, draw:()=>drawPlayer(cx,cy)}];
+  // keys (only when not yet picked up)
+  for(const k of keyPoints){ if(!keysFound.has(k.regId)) drawKey(k.px.x-cx,k.px.y-cy); }
+  // depth-sorted huts + player
+  const items=[...huts.map(h=>({y:(h.hy+2)*TILE,draw:()=>drawHut(h,cx,cy)})),
+               {y:player.y+player.h,draw:()=>drawPlayer(cx,cy)}];
   items.sort((a,b)=>a.y-b.y).forEach(i=>i.draw());
 }
 
+// ---------- ground ----------
+function groundColor(theme,s){
+  const v=Math.floor(s*16);
+  switch(theme){
+    case 'desert':   return `rgb(${224+(v>>1)},${201+(v>>1)},${130+v})`;
+    case 'highlands':return `rgb(${108+v},${176+v},${88+(v>>1)})`;
+    case 'wetland':  return `rgb(${96+v},${168+v},${118+v})`;
+    case 'volcanic': return `rgb(${62+v},${54+(v>>1)},${52+(v>>1)})`;
+    case 'farmland': return `rgb(${196+v},${166+v},${94+v})`;
+    case 'coast':    return `rgb(${233+(v>>1)},${214+(v>>1)},${166+v})`;
+  }
+}
+function drawGround(theme,x,y,s){
+  ctx.fillStyle=groundColor(theme,s); ctx.fillRect(x,y,TILE,TILE);
+  if(theme==='highlands'||theme==='wetland'){
+    if(s>0.5){ ctx.strokeStyle='rgba(60,110,50,.25)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x+12,y+34); ctx.lineTo(x+12,y+27);
+      ctx.moveTo(x+18,y+36); ctx.lineTo(x+18,y+30); ctx.stroke(); }
+  } else if(theme==='desert'||theme==='coast'){
+    ctx.fillStyle='rgba(150,120,70,.18)';
+    ctx.beginPath(); ctx.arc(x+12+s*20,y+16,1.5,0,7); ctx.arc(x+30,y+32-s*10,1.3,0,7); ctx.fill();
+  } else if(theme==='volcanic'){
+    if(s>0.6){ ctx.strokeStyle='rgba(220,90,40,.35)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x+8,y+30); ctx.lineTo(x+20,y+22); ctx.lineTo(x+34,y+30); ctx.stroke(); }
+  } else if(theme==='farmland'){
+    ctx.strokeStyle='rgba(120,95,40,.30)'; ctx.lineWidth=2;
+    for(let i=12;i<TILE;i+=14){ ctx.beginPath(); ctx.moveTo(x,y+i); ctx.lineTo(x+TILE,y+i); ctx.stroke(); }
+  }
+}
 function drawTile(c,r,x,y){
-  const t=terrain[r][c], s=shade[r][c];
-  // grass base under everything
-  const g = 150 + Math.floor(s*22);
-  ctx.fillStyle = `rgb(${108+Math.floor(s*16)},${g},${86+Math.floor(s*14)})`;
-  ctx.fillRect(x,y,TILE,TILE);
-  // faint grass blades
-  if(s>0.5){ ctx.strokeStyle='rgba(70,120,55,.25)'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(x+10,y+34); ctx.lineTo(x+10,y+28);
-    ctx.moveTo(x+16,y+36); ctx.lineTo(x+16,y+30); ctx.stroke(); }
+  const theme=regionAt(c,r).theme, t=terrain[r][c], s=shade[r][c];
+  if(t===LIQUID){ drawLiquid(theme,x,y,c,r); return; }
+  drawGround(theme,x,y,s);
+  if(t===PATH) drawPath(x,y,s);
+  else if(t===DECO) drawDeco(theme,x,y,s);
+  else if(t===OBSTACLE) drawObstacle(theme,x,y,s,c,r);
+}
+function drawPath(x,y,s){
+  ctx.fillStyle='#d4b27e'; rr(x+1,y+1,TILE-2,TILE-2,7); ctx.fill();
+  ctx.fillStyle='rgba(150,118,72,.5)';
+  ctx.beginPath(); ctx.arc(x+15+s*10,y+18,2,0,7); ctx.arc(x+32,y+33-s*8,1.7,0,7); ctx.fill();
+}
 
-  if(t===PATH){
-    ctx.fillStyle='#d9bd8c'; roundRect(x+2,y+2,TILE-4,TILE-4,7); ctx.fill();
-    ctx.fillStyle='rgba(166,131,86,.5)';
-    ctx.beginPath(); ctx.arc(x+16+s*8,y+20,2.2,0,7); ctx.arc(x+30,y+34-s*6,1.8,0,7); ctx.fill();
-  } else if(t===FLOWER){
-    const cols=['#e86a8e','#f2c14e','#f4f1ec','#c98bd8']; ctx.fillStyle=cols[Math.floor(s*4)%4];
-    const fx=x+TILE/2, fy=y+TILE/2;
-    for(let a=0;a<5;a++){ const ang=a/5*Math.PI*2;
-      ctx.beginPath(); ctx.arc(fx+Math.cos(ang)*5, fy+Math.sin(ang)*5, 3.2, 0,7); ctx.fill(); }
-    ctx.fillStyle='#f6df73'; ctx.beginPath(); ctx.arc(fx,fy,2.6,0,7); ctx.fill();
-  } else if(t===WATER){
-    ctx.fillStyle='#4aa3df'; ctx.fillRect(x,y,TILE,TILE);
-    ctx.fillStyle='rgba(255,255,255,.4)';
-    const w=Math.sin(time*2+c+r)*4;
+// ---------- liquids ----------
+function drawLiquid(theme,x,y,c,r){
+  if(theme==='volcanic'){
+    ctx.fillStyle='#5a1c12'; ctx.fillRect(x,y,TILE,TILE);
+    const g=0.5+0.5*Math.sin(time*2+c*1.3+r); ctx.fillStyle=`rgba(255,${90+g*80|0},20,.9)`;
+    rr(x+4,y+4,TILE-8,TILE-8,8); ctx.fill();
+    ctx.fillStyle=`rgba(255,230,120,${0.4+g*0.4})`;
+    ctx.beginPath(); ctx.arc(x+18,y+22,4,0,7); ctx.fill();
+  } else {
+    ctx.fillStyle='#3f93cf'; ctx.fillRect(x,y,TILE,TILE);
+    ctx.fillStyle='rgba(255,255,255,.4)'; const w=Math.sin(time*2+c+r)*4;
     ctx.beginPath(); ctx.ellipse(x+18+w,y+18,7,2.4,0,0,7); ctx.fill();
     ctx.beginPath(); ctx.ellipse(x+32-w,y+34,5,2,0,0,7); ctx.fill();
-  } else if(t===TREE){
-    ctx.fillStyle='rgba(40,60,30,.22)';
-    ctx.beginPath(); ctx.ellipse(x+TILE/2,y+TILE-6,15,5,0,0,7); ctx.fill();
-    ctx.fillStyle='#7a5230'; ctx.fillRect(x+TILE/2-4,y+TILE-22,8,16);
-    ctx.fillStyle='#3f7a35';
-    ctx.beginPath(); ctx.arc(x+TILE/2,y+18,17,0,7); ctx.fill();
-    ctx.fillStyle='#56994a';
-    ctx.beginPath(); ctx.arc(x+TILE/2-6,y+14,11,0,7); ctx.arc(x+TILE/2+7,y+16,10,0,7); ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,.18)';
-    ctx.beginPath(); ctx.arc(x+TILE/2-5,y+12,5,0,7); ctx.fill();
   }
 }
 
-function drawHouse(h,cx,cy){
+// ---------- walkable deco ----------
+function drawDeco(theme,x,y,s){
+  const cx=x+TILE/2, cy=y+TILE/2;
+  if(theme==='highlands'){
+    const sway=Math.sin(time*2+x*0.1)*3; ctx.strokeStyle='#5b9a3e'; ctx.lineWidth=2;
+    for(let i=-1;i<2;i++){ ctx.beginPath(); ctx.moveTo(cx+i*5,cy+8); ctx.quadraticCurveTo(cx+i*5+sway,cy,cx+i*5+sway*1.4,cy-9); ctx.stroke(); }
+  } else if(theme==='wetland'){
+    ctx.fillStyle='#4a9a5e'; ctx.beginPath(); ctx.ellipse(cx,cy,9,6,0,0,7); ctx.fill();
+    ctx.fillStyle='#ec7aa0'; ctx.beginPath(); ctx.arc(cx+3,cy-2,2.5,0,7); ctx.fill();
+  } else if(theme==='desert'){
+    const cols=['#e8743d','#f2c14e']; ctx.fillStyle=cols[(s*2|0)%2];
+    for(let a=0;a<5;a++){ const ang=a/5*6.28; ctx.beginPath(); ctx.arc(cx+Math.cos(ang)*4,cy+Math.sin(ang)*4,2.4,0,7); ctx.fill(); }
+  } else if(theme==='volcanic'){
+    const g=0.4+0.4*Math.sin(time*3+x); ctx.strokeStyle=`rgba(255,120,40,${g})`; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(cx-8,cy+4); ctx.lineTo(cx,cy-4); ctx.lineTo(cx+8,cy+2); ctx.stroke();
+  } else if(theme==='farmland'){
+    ctx.strokeStyle='#caa53a'; ctx.lineWidth=2;
+    for(let i=-1;i<2;i++){ ctx.beginPath(); ctx.moveTo(cx+i*5,cy+9); ctx.lineTo(cx+i*5,cy-8); ctx.stroke(); }
+    ctx.fillStyle='#e0c24e'; ctx.beginPath(); for(let i=-1;i<2;i++) ctx.arc(cx+i*5,cy-9,2.4,0,7); ctx.fill();
+  } else if(theme==='coast'){
+    ctx.fillStyle='#f6a6b2'; ctx.beginPath(); ctx.arc(cx,cy,5,Math.PI,0); ctx.fill();
+    ctx.strokeStyle='#d98090'; ctx.lineWidth=1; ctx.beginPath();
+    ctx.moveTo(cx-4,cy); ctx.lineTo(cx,cy-4); ctx.moveTo(cx,cy); ctx.lineTo(cx,cy-5); ctx.moveTo(cx+4,cy); ctx.lineTo(cx,cy-4); ctx.stroke();
+  }
+}
+
+// ---------- obstacles (theme features) ----------
+function shadowEllipse(cx,by,w,h){ ctx.fillStyle='rgba(40,28,18,.22)'; ctx.beginPath(); ctx.ellipse(cx,by,w,h,0,0,7); ctx.fill(); }
+function drawObstacle(theme,x,y,s,c,r){
+  const cx=x+TILE/2, by=y+TILE-6;
+  if(theme==='desert'){
+    shadowEllipse(cx,by,12,4);
+    if(s>0.7){ ctx.fillStyle='#9c8267'; ctx.beginPath(); ctx.ellipse(cx,by-6,13,10,0,0,7); ctx.fill();
+      ctx.fillStyle='#b59a7d'; ctx.beginPath(); ctx.ellipse(cx-3,by-9,7,5,0,0,7); ctx.fill(); }
+    else { ctx.fillStyle='#3f8f4a'; rr(cx-5,y+8,10,TILE-14,5); ctx.fill();
+      rr(cx-15,y+18,10,7,4); ctx.fill(); rr(cx-15,y+11,5,12,3); ctx.fill();
+      rr(cx+5,y+22,10,6,4); ctx.fill(); rr(cx+9,y+15,5,12,3); ctx.fill();
+      ctx.strokeStyle='rgba(20,80,30,.4)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(cx,y+10); ctx.lineTo(cx,y+TILE-8); ctx.stroke(); }
+  } else if(theme==='highlands'){
+    if(s>0.6){ // wind turbine (animated)
+      shadowEllipse(cx,by,9,4);
+      ctx.strokeStyle='#e9eef2'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(cx,y+TILE-6); ctx.lineTo(cx,y-2); ctx.stroke();
+      const a=time*2+c+r; ctx.strokeStyle='#f4f7fa'; ctx.lineWidth=5;
+      for(let i=0;i<3;i++){ const ang=a+i*2.094; ctx.beginPath(); ctx.moveTo(cx,y); ctx.lineTo(cx+Math.cos(ang)*15,y+Math.sin(ang)*15); ctx.stroke(); }
+      ctx.fillStyle='#cfd8df'; ctx.beginPath(); ctx.arc(cx,y,3,0,7); ctx.fill();
+    } else { shadowEllipse(cx,by,12,4);
+      ctx.fillStyle='#3f8a3a'; ctx.beginPath(); ctx.arc(cx-5,by-7,8,0,7); ctx.arc(cx+5,by-7,8,0,7); ctx.arc(cx,by-12,9,0,7); ctx.fill(); }
+  } else if(theme==='wetland'){
+    shadowEllipse(cx,by,8,3);
+    ctx.strokeStyle='#5a8f46'; ctx.lineWidth=3;
+    for(let i=-1;i<2;i++){ ctx.beginPath(); ctx.moveTo(cx+i*6,by); ctx.lineTo(cx+i*6+Math.sin(time+i)*2,y+6); ctx.stroke();
+      ctx.fillStyle='#7a4a2a'; ctx.fillRect(cx+i*6-2,y+4,4,9); }
+  } else if(theme==='volcanic'){
+    shadowEllipse(cx,by,13,4);
+    if(s>0.62){ // steam vent
+      ctx.fillStyle='#4a3f3c'; ctx.beginPath(); ctx.ellipse(cx,by-2,11,7,0,0,7); ctx.fill();
+      ctx.fillStyle='#2a2220'; ctx.beginPath(); ctx.ellipse(cx,by-3,5,3,0,0,7); ctx.fill();
+      for(let i=0;i<3;i++){ const t2=(time*0.6+i*0.5)%1; ctx.fillStyle=`rgba(220,210,205,${0.4*(1-t2)})`;
+        ctx.beginPath(); ctx.arc(cx+Math.sin(t2*6+i)*4,by-8-t2*22,3+t2*4,0,7); ctx.fill(); }
+    } else { ctx.fillStyle='#6b5e5a'; ctx.beginPath(); ctx.moveTo(cx-13,by); ctx.lineTo(cx-7,by-15); ctx.lineTo(cx+5,by-17); ctx.lineTo(cx+13,by-4); ctx.lineTo(cx+9,by); ctx.closePath(); ctx.fill();
+      ctx.fillStyle='#574b48'; ctx.beginPath(); ctx.moveTo(cx-7,by-15); ctx.lineTo(cx+5,by-17); ctx.lineTo(cx+1,by-6); ctx.closePath(); ctx.fill(); }
+  } else if(theme==='farmland'){
+    shadowEllipse(cx,by,13,4);
+    if(s>0.55){ ctx.fillStyle='#dcb24e'; rr(cx-13,by-15,26,15,6); ctx.fill();
+      ctx.strokeStyle='rgba(150,110,40,.5)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(cx-13,by-10); ctx.lineTo(cx+13,by-10); ctx.moveTo(cx-13,by-5); ctx.lineTo(cx+13,by-5); ctx.stroke();
+      ctx.strokeStyle='#b88a2e'; ctx.strokeRect(cx-13,by-15,26,15);
+    } else { ctx.fillStyle='#9c7b4a'; ctx.fillRect(cx-2,y+6,4,TILE-12);
+      ctx.fillStyle='#b08a52'; ctx.fillRect(cx-10,y+12,20,4); }
+  } else if(theme==='coast'){
+    shadowEllipse(cx,by,12,4);
+    if(s>0.55){ ctx.fillStyle='#8a5a30'; ctx.fillRect(cx-3,y+14,6,TILE-20);
+      ctx.fillStyle='#3f9a55'; for(let i=0;i<5;i++){ const ang=Math.PI+ i*0.7; ctx.save(); ctx.translate(cx,y+14); ctx.rotate(ang);
+        ctx.beginPath(); ctx.ellipse(14,0,14,4,0,0,7); ctx.fill(); ctx.restore(); }
+      ctx.fillStyle='#caa24a'; ctx.beginPath(); ctx.arc(cx,y+14,4,0,7); ctx.fill();
+    } else { ctx.fillStyle='#9a9388'; ctx.beginPath(); ctx.ellipse(cx,by-5,11,8,0,0,7); ctx.fill();
+      ctx.fillStyle='#b3aca0'; ctx.beginPath(); ctx.ellipse(cx-3,by-8,5,4,0,0,7); ctx.fill(); }
+  }
+}
+
+// ---------- key ----------
+function drawKey(px,py){
+  const pulse=1+Math.sin(time*4)*0.12;
+  ctx.save(); ctx.translate(px,py); ctx.scale(pulse,pulse);
+  ctx.fillStyle='rgba(255,220,120,.35)'; ctx.beginPath(); ctx.arc(0,0,15,0,7); ctx.fill();
+  ctx.strokeStyle='#7a5b12'; ctx.lineWidth=2; ctx.fillStyle='#f1c64a';
+  ctx.beginPath(); ctx.arc(-5,-4,6,0,7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#fff5cf'; ctx.beginPath(); ctx.arc(-5,-4,2.4,0,7); ctx.fill();
+  ctx.fillStyle='#f1c64a'; ctx.strokeStyle='#7a5b12';
+  rr(-1,-1.6,12,3.2,1.4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#f1c64a'; ctx.fillRect(7,1.6,2.4,4.5); ctx.fillRect(10,1.6,2.4,3.5);
+  ctx.restore();
+  const tw=(time*1.4)%2; if(tw<1){ ctx.fillStyle=`rgba(255,255,255,${1-tw})`;
+    ctx.beginPath(); ctx.arc(px+9,py-9,1.6+tw*2,0,7); ctx.fill(); }
+}
+
+// ---------- hut ----------
+function drawHut(h,cx,cy){
   const bx=h.hx*TILE-cx, by=h.hy*TILE-cy, W=TILE*2;
   const wallY=by+TILE*0.72, wallH=TILE*1.28;
-  const done=collected.has(h.card.id);
-  // shadow
-  ctx.fillStyle='rgba(40,28,18,.22)';
-  ctx.beginPath(); ctx.ellipse(bx+TILE, by+TILE*2-4, TILE-2, 9, 0,0,7); ctx.fill();
-  // wall
-  ctx.fillStyle='#f2e3c5'; roundRect(bx+5,wallY,W-10,wallH,8); ctx.fill();
+  const card=h.reg.card, done=collected.has(card.title), hasKey=keysFound.has(h.reg.id);
+  ctx.fillStyle='rgba(40,28,18,.22)'; ctx.beginPath(); ctx.ellipse(bx+TILE,by+TILE*2-4,TILE-2,9,0,0,7); ctx.fill();
+  ctx.fillStyle='#f2e3c5'; rr(bx+5,wallY,W-10,wallH,8); ctx.fill();
   ctx.strokeStyle='#3a2c22'; ctx.lineWidth=3; ctx.stroke();
-  // roof (themed colour)
-  ctx.fillStyle=h.card.color; ctx.strokeStyle='#3a2c22'; ctx.lineWidth=3;
-  ctx.beginPath();
-  ctx.moveTo(bx-6, wallY+2);
-  ctx.lineTo(bx+TILE, by-4);
-  ctx.lineTo(bx+W+6, wallY+2);
-  ctx.closePath(); ctx.fill(); ctx.stroke();
-  // roof shading
-  ctx.fillStyle='rgba(0,0,0,.12)';
-  ctx.beginPath(); ctx.moveTo(bx+TILE,by-4); ctx.lineTo(bx+W+6,wallY+2); ctx.lineTo(bx+TILE,wallY+2); ctx.closePath(); ctx.fill();
-  // door
-  ctx.fillStyle='#7a5230'; roundRect(bx+TILE-13, wallY+wallH-32, 26, 32, 5,true,false); ctx.fill();
+  ctx.fillStyle=card.color; ctx.beginPath();
+  ctx.moveTo(bx-6,wallY+2); ctx.lineTo(bx+TILE,by-4); ctx.lineTo(bx+W+6,wallY+2); ctx.closePath();
+  ctx.fill(); ctx.strokeStyle='#3a2c22'; ctx.lineWidth=3; ctx.stroke();
+  ctx.fillStyle='rgba(0,0,0,.12)'; ctx.beginPath();
+  ctx.moveTo(bx+TILE,by-4); ctx.lineTo(bx+W+6,wallY+2); ctx.lineTo(bx+TILE,wallY+2); ctx.closePath(); ctx.fill();
+  // door — barred with a lock if you lack the key
+  ctx.fillStyle='#7a5230'; rr(bx+TILE-13,wallY+wallH-32,26,32,5); ctx.fill();
   ctx.strokeStyle='#3a2c22'; ctx.lineWidth=2; ctx.stroke();
-  ctx.fillStyle='#e0a52e'; ctx.beginPath(); ctx.arc(bx+TILE+7, wallY+wallH-16, 2.4,0,7); ctx.fill();
+  if(!hasKey){ ctx.fillStyle='#caa23a'; ctx.font='13px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('🔒',bx+TILE,wallY+wallH-16); }
+  else { ctx.fillStyle='#e0a52e'; ctx.beginPath(); ctx.arc(bx+TILE+7,wallY+wallH-16,2.4,0,7); ctx.fill(); }
   // windows
   ctx.fillStyle=done?'#bfe3f5':'#ffe9a8';
-  [bx+16, bx+W-30].forEach(wx=>{
-    roundRect(wx, wallY+12, 18, 18, 3); ctx.fill();
+  [bx+16,bx+W-30].forEach(wx=>{ rr(wx,wallY+12,18,18,3); ctx.fill();
     ctx.strokeStyle='#3a2c22'; ctx.lineWidth=2; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(wx+9,wallY+12); ctx.lineTo(wx+9,wallY+30);
-    ctx.moveTo(wx,wallY+21); ctx.lineTo(wx+18,wallY+21); ctx.stroke();
-  });
-  // hanging sign with the card's icon
+    ctx.beginPath(); ctx.moveTo(wx+9,wallY+12); ctx.lineTo(wx+9,wallY+30); ctx.moveTo(wx,wallY+21); ctx.lineTo(wx+18,wallY+21); ctx.stroke(); });
+  // icon sign
   ctx.font='17px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillStyle='#fff8ec'; roundRect(bx+TILE-15, wallY-2, 30, 22, 6); ctx.fill();
-  ctx.strokeStyle='#3a2c22'; ctx.lineWidth=2; ctx.stroke();
-  ctx.fillText(h.card.icon, bx+TILE, wallY+10);
-  // collected check
-  if(done){
-    ctx.fillStyle='#4e8d3f'; ctx.beginPath(); ctx.arc(bx+W-4, by+4, 11,0,7); ctx.fill();
-    ctx.strokeStyle='#fff'; ctx.lineWidth=2.5;
-    ctx.beginPath(); ctx.moveTo(bx+W-9,by+4); ctx.lineTo(bx+W-5,by+8); ctx.lineTo(bx+1,by); ctx.stroke();
-  }
+  ctx.fillStyle='#fff8ec'; rr(bx+TILE-15,wallY-2,30,22,6); ctx.fill();
+  ctx.strokeStyle='#3a2c22'; ctx.lineWidth=2; ctx.stroke(); ctx.fillText(card.icon,bx+TILE,wallY+10);
+  if(done){ ctx.fillStyle='#4e8d3f'; ctx.beginPath(); ctx.arc(bx+W-4,by+4,11,0,7); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2.5; ctx.beginPath();
+    ctx.moveTo(bx+W-9,by+4); ctx.lineTo(bx+W-5,by+8); ctx.lineTo(bx+1,by); ctx.stroke(); }
   ctx.textAlign='start'; ctx.textBaseline='alphabetic';
 }
 
+// ---------- player ----------
 function drawPlayer(cx,cy){
-  const x=player.x-cx, y=player.y-cy, w=player.w, h=player.h;
-  const cxp=x+w/2;
+  const x=player.x-cx, y=player.y-cy, w=player.w, h=player.h, cxp=x+w/2;
   const step=player.moving?Math.sin(player.bob)*2:0;
-  // shadow
-  ctx.fillStyle='rgba(40,28,18,.25)';
-  ctx.beginPath(); ctx.ellipse(cxp, y+h, w/2, 5,0,0,7); ctx.fill();
-  // body (tunic)
+  ctx.fillStyle='rgba(40,28,18,.25)'; ctx.beginPath(); ctx.ellipse(cxp,y+h,w/2,5,0,0,7); ctx.fill();
   ctx.fillStyle='#4e8d3f'; ctx.strokeStyle='#2e5a25'; ctx.lineWidth=2;
-  roundRect(x+3, y+h*0.42+step, w-6, h*0.5, 6,true,true);
-  // head
+  rr(x+3,y+h*0.42+step,w-6,h*0.5,6); ctx.fill(); ctx.stroke();
   ctx.fillStyle='#f1c9a5'; ctx.strokeStyle='#caa07a'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.arc(cxp, y+h*0.32+step, w*0.42, 0,7); ctx.fill(); ctx.stroke();
-  // hair / cap
-  ctx.fillStyle='#a8521f';
-  ctx.beginPath(); ctx.arc(cxp, y+h*0.27+step, w*0.43, Math.PI*1.05, Math.PI*1.95); ctx.fill();
-  // eyes (shift with facing direction)
-  ctx.fillStyle='#3a2c22';
-  let ex=0,ey=0;
-  if(player.dir==='left')ex=-2; else if(player.dir==='right')ex=2;
-  else if(player.dir==='up')ey=-2;
-  if(player.dir!=='up'){
-    ctx.beginPath();
-    ctx.arc(cxp-4+ex, y+h*0.33+ey+step, 1.7,0,7);
-    ctx.arc(cxp+4+ex, y+h*0.33+ey+step, 1.7,0,7); ctx.fill();
-  }
+  ctx.beginPath(); ctx.arc(cxp,y+h*0.32+step,w*0.42,0,7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#a8521f'; ctx.beginPath(); ctx.arc(cxp,y+h*0.27+step,w*0.43,Math.PI*1.05,Math.PI*1.95); ctx.fill();
+  ctx.fillStyle='#3a2c22'; let ex=0,ey=0;
+  if(player.dir==='left')ex=-2; else if(player.dir==='right')ex=2; else if(player.dir==='up')ey=-2;
+  if(player.dir!=='up'){ ctx.beginPath(); ctx.arc(cxp-4+ex,y+h*0.33+ey+step,1.7,0,7); ctx.arc(cxp+4+ex,y+h*0.33+ey+step,1.7,0,7); ctx.fill(); }
 }
 
-// rounded-rect helper (optionally fill/stroke handled by caller)
-function roundRect(x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
+function rr(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 
 /* =====================================================================
-   6) CARDS, JOURNAL, UI
+   6) UI
    ===================================================================== */
 const $=id=>document.getElementById(id);
-$('total').textContent = CARDS.length;
-$('topicName').textContent = TOPIC;
+$('total').textContent=REGIONS.length; $('topicName').textContent=TOPIC;
 
 function interact(){
-  if(paused || !nearHouse) return;
-  openCard(nearHouse.card);
+  if(paused||!nearHut) return;
+  if(!keysFound.has(nearHut.reg.id)){ toast('🔒 The hut is locked — find the '+nearHut.reg.name+' key first.'); return; }
+  openCard(nearHut.reg);
 }
-function openCard(card){
-  const fresh = !collected.has(card.id);
-  if(fresh){ collected.add(card.id); refreshCount(); showToast(); }
-  $('cardHead').style.background = `linear-gradient(135deg, ${card.color}, ${shade2(card.color)})`;
-  $('cardIcon').textContent = card.icon;
-  $('cardTitle').textContent = card.title;
-  $('cardText').textContent = card.text;
-  $('cardBadge').style.display = fresh ? 'block' : 'none';
+function openCard(reg){
+  const card=reg.card, fresh=!collected.has(card.title);
+  if(fresh){ collected.add(card.title); $('count').textContent=collected.size; showToast('✨ '+card.title+' card collected!'); }
+  $('cardHead').style.background=`linear-gradient(135deg,${card.color},${darken(card.color)})`;
+  $('cardIcon').textContent=card.icon; $('cardTitle').textContent=card.title;
+  $('cardPlace').textContent=reg.name; $('cardText').textContent=card.text;
+  $('cardBadge').style.display=fresh?'block':'none';
   show('cardScrim');
-}
-function refreshCount(){ $('count').textContent = collected.size; }
-function showToast(){
-  const t=$('toast'); t.classList.add('show');
-  clearTimeout(showToast._t); showToast._t=setTimeout(()=>t.classList.remove('show'),1700);
 }
 function buildJournal(){
   const grid=$('journalGrid'); grid.innerHTML='';
-  CARDS.forEach(card=>{
-    const got=collected.has(card.id);
-    const el=document.createElement('div');
-    el.className='tile'+(got?'':' locked');
-    el.innerHTML = got
-      ? `<div class="ic">${card.icon}</div><h3>${card.title}</h3><small>Discovered ✓</small>`
-      : `<div class="ic">🔒</div><h3>? ? ?</h3><small>Not found yet</small>`;
-    if(got) el.onclick=()=>{ hide('journalScrim'); openCard(card); };
+  REGIONS.forEach(reg=>{
+    const got=collected.has(reg.card.title), hasKey=keysFound.has(reg.id);
+    const el=document.createElement('div'); el.className='tile'+(got?'':' locked');
+    el.innerHTML=got
+      ? `<div class="ic">${reg.card.icon}</div><h3>${reg.card.title}</h3><small>${reg.name} ✓</small>`
+      : `<div class="ic">${hasKey?'🔑':'🔒'}</div><h3>? ? ?</h3><small>${hasKey?'Key found — enter the hut':'Hidden in '+reg.name}</small>`;
+    if(got) el.onclick=()=>{ hide('journalScrim'); openCard(reg); };
     grid.appendChild(el);
   });
 }
-function toggleJournal(){
-  if($('journalScrim').classList.contains('hidden')){ buildJournal(); show('journalScrim'); }
-  else hide('journalScrim');
-}
+function toggleJournal(){ if($('journalScrim').classList.contains('hidden')){ buildJournal(); show('journalScrim'); } else hide('journalScrim'); }
 
-// helpers for modal state (modals pause the game)
+let bannerT;
+function showBanner(reg){ const b=$('banner'); b.innerHTML=`${reg.name}<small>${reg.card.title}</small>`;
+  b.classList.add('show'); clearTimeout(bannerT); bannerT=setTimeout(()=>b.classList.remove('show'),1900); }
+function updateRegionLabel(){ if(!currentRegion) return;
+  const hasKey=keysFound.has(currentRegion.id), done=collected.has(currentRegion.card.title);
+  $('regionLabel').innerHTML=`📍 ${currentRegion.name} &nbsp; ${done?'✅':(hasKey?'🔑':'🔒')}`; }
+let toastT;
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1900); }
+function showToast(msg){ toast(msg); }
+
 function show(id){ $(id).classList.remove('hidden'); paused=true; }
-function hide(id){ $(id).classList.add('hidden'); if(noModalOpen()) paused=false; }
-function noModalOpen(){ return ['cardScrim','journalScrim','introScrim'].every(i=>$(i).classList.contains('hidden')); }
-function closeAll(){ ['cardScrim','journalScrim'].forEach(i=>$(i).classList.add('hidden')); if(noModalOpen())paused=false; }
-function shade2(hex){ // darken a hex colour for the gradient
-  const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
-  r=Math.max(0,r-40); g=Math.max(0,g-40); b=Math.max(0,b-40);
-  return `rgb(${r},${g},${b})`;
-}
+function hide(id){ $(id).classList.add('hidden'); if(noModal()) paused=false; }
+function noModal(){ return ['cardScrim','journalScrim','introScrim'].every(i=>$(i).classList.contains('hidden')); }
+function closeAll(){ ['cardScrim','journalScrim'].forEach(i=>$(i).classList.add('hidden')); if(noModal()) paused=false; }
+function darken(hex){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
+  return `rgb(${Math.max(0,r-42)},${Math.max(0,g-42)},${Math.max(0,b-42)})`; }
 
-$('cardClose').onclick   = ()=>hide('cardScrim');
-$('journalBtn').onclick  = toggleJournal;
-$('journalClose').onclick= ()=>hide('journalScrim');
-$('introClose').onclick  = ()=>hide('introScrim');
+$('cardClose').onclick=()=>hide('cardScrim');
+$('journalBtn').onclick=toggleJournal;
+$('journalClose').onclick=()=>hide('journalScrim');
+$('introClose').onclick=()=>{ hide('introScrim');
+  currentRegion=regionAt(START.gx,START.gy); showBanner(currentRegion); updateRegionLabel(); };
 
 /* =====================================================================
-   7) MAIN LOOP
+   7) LOOP
    ===================================================================== */
 let last=performance.now();
-function loop(now){
-  const dt=Math.min(0.033,(now-last)/1000); last=now; time+=dt;
-  update(dt); render();
-  requestAnimationFrame(loop);
-}
+function loop(now){ const dt=Math.min(0.033,(now-last)/1000); last=now; time+=dt; update(dt); render(); requestAnimationFrame(loop); }
 requestAnimationFrame(loop);
 </script>
 </body>
