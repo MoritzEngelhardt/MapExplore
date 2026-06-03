@@ -110,6 +110,13 @@
     border-radius:999px;border:2px solid var(--ink);z-index:30;box-shadow:0 8px 18px var(--shadow);
     transition:transform .4s cubic-bezier(.2,1.3,.5,1);}
   .toast.show{transform:translateX(-50%) translateY(0);}
+  .confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:25;}
+  .confetti i{position:absolute;top:-12px;width:9px;height:14px;opacity:.95;border-radius:2px;
+    animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(560px) rotate(720deg);opacity:.4;}}
+  .card-head.party{background:linear-gradient(135deg,#e8a33d,#4e8d3f,#3f7fb8);background-size:200% 200%;
+    animation:party 4s ease infinite;}
+  @keyframes party{0%{background-position:0 0;}50%{background-position:100% 100%;}100%{background-position:0 0;}}
   .hint{font-size:11px;color:var(--ink-soft);text-align:center;padding:8px;border-top:3px solid var(--line);}
   @media(max-width:540px){.titles p,.hint{display:none;}.titles h1{font-size:16px;}.banner{font-size:22px;}}
 </style>
@@ -166,6 +173,23 @@
           <button class="btn x" id="journalClose">Close</button>
         </div>
         <div class="grid" id="journalGrid"></div>
+      </div>
+    </div>
+
+    <div class="confetti" id="confetti"></div>
+
+    <div class="scrim hidden" id="congratsScrim">
+      <div class="card">
+        <div class="card-head party">
+          <div class="card-icon">🏆</div>
+          <h2>Realm Master!</h2>
+          <div class="place" id="congratsSub"></div>
+        </div>
+        <div class="card-body" id="congratsText"></div>
+        <div class="card-foot" style="display:flex;gap:10px;justify-content:center">
+          <button class="btn" id="congratsJournal">📖 View Journal</button>
+          <button class="btn accent" id="congratsClose">Keep wandering</button>
+        </div>
       </div>
     </div>
 
@@ -271,7 +295,9 @@ REGIONS.forEach(reg=>{
 // reserved tiles (kept clear of obstacles/liquid)
 const reserved=new Set();
 huts.forEach(h=>{ for(let dx=-1;dx<3;dx++) for(let dy=-1;dy<4;dy++) reserved.add(key(h.hx+dx,h.hy+dy)); });
-keyPoints.forEach(k=>{ for(let dx=-1;dx<=1;dx++) for(let dy=-1;dy<=1;dy++) reserved.add(key(k.gx+dx,k.gy+dy)); });
+// only the key tile + its 4 orthogonal neighbours stay clear (so it can be reached
+// from any side); the diagonals get filled with decor below to hide it in a little nook
+keyPoints.forEach(k=>{ [[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>reserved.add(key(k.gx+dx,k.gy+dy))); });
 for(let dx=-2;dx<=2;dx++) for(let dy=-2;dy<=2;dy++) reserved.add(key(START.gx+dx,START.gy+dy));
 const isReserved=(c,r)=>reserved.has(key(c,r));
 
@@ -296,6 +322,15 @@ REGIONS.forEach(reg=>{
   }
 });
 
+// tuck each key into a small grove: fill its 4 diagonal tiles with decor as cover
+keyPoints.forEach(k=>{
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dx,dy])=>{
+    const c=k.gx+dx, r=k.gy+dy;
+    if(c<0||r<0||c>=COLS||r>=ROWS||solidHouse.has(key(c,r))||reserved.has(key(c,r))) return;
+    terrain[r][c]=OBSTACLE;
+  });
+});
+
 // roads connecting the regions (cleared corridors)
 for(let r=0;r<ROWS;r++){ terrain[r][16]=PATH; terrain[r][32]=PATH; }
 for(let c=0;c<COLS;c++){ terrain[12][c]=PATH; }
@@ -313,11 +348,24 @@ function isSolid(c,r){
   return t===OBSTACLE || t===LIQUID || solidHouse.has(key(c,r));
 }
 
+// a cat sits somewhere random on open ground, away from huts
+let cat=null;
+for(let tries=0;tries<500;tries++){
+  const c=2+Math.floor(Math.random()*(COLS-4)), r=2+Math.floor(Math.random()*(ROWS-4));
+  const t=terrain[r][c];
+  if(t===OBSTACLE||t===LIQUID||isRoad(c,r)||solidHouse.has(key(c,r))) continue;
+  if(keyPoints.some(k=>k.gx===c&&k.gy===r)) continue;
+  if(huts.some(h=>Math.abs(h.hx-c)<3&&Math.abs(h.hy-r)<3)) continue;
+  if(![[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>!isSolid(c+dx,r+dy))) continue; // reachable
+  cat={ gx:c, gy:r, px:{x:c*TILE+TILE/2, y:r*TILE+TILE/2}, meowUntil:0, say:'Meow!' };
+  break;
+}
+
 /* =====================================================================
    3) PLAYER + INPUT
    ===================================================================== */
 const player={ x:START.gx*TILE+12, y:START.gy*TILE+10, w:24, h:30, speed:182, dir:'down', moving:false, bob:0 };
-const keys={}; let paused=true, nearHut=null, time=0;
+const keys={}; let paused=true, nearHut=null, nearCat=false, time=0, congratsShown=false;
 const collected=new Set();   // card ids
 const keysFound=new Set();   // region ids whose key is picked up
 let currentRegion=null;
@@ -380,14 +428,18 @@ function refreshPrompt(){
   const px=player.x+player.w/2, py=player.y+player.h/2;
   nearHut=null; let best=74;
   for(const h of huts){ const d=Math.hypot(px-h.doorPx.x,py-h.doorPx.y); if(d<best){ best=d; nearHut=h; } }
+  nearCat = !!cat && Math.hypot(px-cat.px.x,py-cat.px.y)<66;
   const p=document.getElementById('prompt');
   p.classList.remove('locked');
-  if(nearHut && !paused){
+  if(paused){ p.classList.add('hidden'); return; }
+  if(nearHut){
     p.classList.remove('hidden');
     const has=keysFound.has(nearHut.reg.id), done=collected.has(nearHut.reg.card.title);
     if(!has){ p.classList.add('locked'); p.innerHTML=`🔒 Locked — find the <b>${nearHut.reg.name}</b> key`; }
     else if(done) p.innerHTML=`Press <b>E</b> to revisit <b>${nearHut.reg.card.title}</b>`;
     else p.innerHTML=`Press <b>E</b> to enter the hut`;
+  } else if(nearCat){
+    p.classList.remove('hidden'); p.innerHTML=`Press <b>E</b> to greet the cat 🐱`;
   } else p.classList.add('hidden');
 }
 
@@ -406,9 +458,10 @@ function render(){
   for(let r=r0;r<r1;r++) for(let c=c0;c<c1;c++) drawTile(c,r,c*TILE-cx,r*TILE-cy);
   // keys (only when not yet picked up)
   for(const k of keyPoints){ if(!keysFound.has(k.regId)) drawKey(k.px.x-cx,k.px.y-cy); }
-  // depth-sorted huts + player
+  // depth-sorted huts + cat + player
   const items=[...huts.map(h=>({y:(h.hy+2)*TILE,draw:()=>drawHut(h,cx,cy)})),
                {y:player.y+player.h,draw:()=>drawPlayer(cx,cy)}];
+  if(cat) items.push({y:cat.px.y+8, draw:()=>drawCat(cx,cy)});
   items.sort((a,b)=>a.y-b.y).forEach(i=>i.draw());
 }
 
@@ -553,18 +606,63 @@ function drawObstacle(theme,x,y,s,c,r){
 
 // ---------- key ----------
 function drawKey(px,py){
-  const pulse=1+Math.sin(time*4)*0.12;
-  ctx.save(); ctx.translate(px,py); ctx.scale(pulse,pulse);
-  ctx.fillStyle='rgba(255,220,120,.35)'; ctx.beginPath(); ctx.arc(0,0,15,0,7); ctx.fill();
-  ctx.strokeStyle='#7a5b12'; ctx.lineWidth=2; ctx.fillStyle='#f1c64a';
+  // smaller and subtler so it must be searched for; only a faint, slow shimmer
+  const glow=0.10+0.08*Math.max(0,Math.sin(time*2));
+  ctx.save(); ctx.translate(px,py); ctx.scale(0.78,0.78);
+  ctx.fillStyle=`rgba(255,225,130,${glow})`; ctx.beginPath(); ctx.arc(0,0,9,0,7); ctx.fill();
+  ctx.strokeStyle='#7a5b12'; ctx.lineWidth=2; ctx.fillStyle='#e7bf52';
   ctx.beginPath(); ctx.arc(-5,-4,6,0,7); ctx.fill(); ctx.stroke();
   ctx.fillStyle='#fff5cf'; ctx.beginPath(); ctx.arc(-5,-4,2.4,0,7); ctx.fill();
-  ctx.fillStyle='#f1c64a'; ctx.strokeStyle='#7a5b12';
+  ctx.fillStyle='#e7bf52'; ctx.strokeStyle='#7a5b12';
   rr(-1,-1.6,12,3.2,1.4); ctx.fill(); ctx.stroke();
-  ctx.fillStyle='#f1c64a'; ctx.fillRect(7,1.6,2.4,4.5); ctx.fillRect(10,1.6,2.4,3.5);
+  ctx.fillStyle='#e7bf52'; ctx.fillRect(7,1.6,2.4,4.5); ctx.fillRect(10,1.6,2.4,3.5);
   ctx.restore();
-  const tw=(time*1.4)%2; if(tw<1){ ctx.fillStyle=`rgba(255,255,255,${1-tw})`;
-    ctx.beginPath(); ctx.arc(px+9,py-9,1.6+tw*2,0,7); ctx.fill(); }
+  const tw=(time*0.55)%3.5; if(tw<0.7){ ctx.fillStyle=`rgba(255,255,255,${1-tw/0.7})`;
+    ctx.beginPath(); ctx.arc(px+8,py-8,1.4+tw*2,0,7); ctx.fill(); }
+}
+
+// ---------- cat ----------
+function drawCat(cx,cy){
+  const x=cat.px.x-cx, y=cat.px.y-cy;
+  const tail=Math.sin(time*2.5)*0.5;            // gentle tail flick
+  const blink=(Math.sin(time*0.7)>0.97);        // occasional blink
+  ctx.fillStyle='rgba(40,28,18,.22)'; ctx.beginPath(); ctx.ellipse(x,y+13,13,4,0,0,7); ctx.fill();
+  // tail
+  ctx.strokeStyle='#e08a3a'; ctx.lineWidth=4; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x+9,y+10); ctx.quadraticCurveTo(x+20,y+6+tail*10,x+15,y-6+tail*8); ctx.stroke();
+  // body
+  ctx.fillStyle='#ef9b45'; ctx.strokeStyle='#b96f24'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.ellipse(x,y+5,10,11,0,0,7); ctx.fill(); ctx.stroke();
+  // head
+  ctx.beginPath(); ctx.arc(x,y-7,8,0,7); ctx.fill(); ctx.stroke();
+  // ears
+  ctx.fillStyle='#ef9b45';
+  ctx.beginPath(); ctx.moveTo(x-8,y-11); ctx.lineTo(x-4,y-18); ctx.lineTo(x-1,y-12); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x+8,y-11); ctx.lineTo(x+4,y-18); ctx.lineTo(x+1,y-12); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#f6c79a';
+  ctx.beginPath(); ctx.moveTo(x-6,y-12); ctx.lineTo(x-4,y-16); ctx.lineTo(x-2,y-12); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x+6,y-12); ctx.lineTo(x+4,y-16); ctx.lineTo(x+2,y-12); ctx.closePath(); ctx.fill();
+  // stripes
+  ctx.strokeStyle='rgba(180,100,30,.55)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x-4,y-13); ctx.lineTo(x-4,y-10); ctx.moveTo(x,y-14); ctx.lineTo(x,y-10); ctx.moveTo(x+4,y-13); ctx.lineTo(x+4,y-10); ctx.stroke();
+  // face
+  ctx.fillStyle='#3a2c22';
+  if(blink){ ctx.lineWidth=1.5; ctx.strokeStyle='#3a2c22';
+    ctx.beginPath(); ctx.moveTo(x-5,y-7); ctx.lineTo(x-2,y-7); ctx.moveTo(x+2,y-7); ctx.lineTo(x+5,y-7); ctx.stroke(); }
+  else { ctx.beginPath(); ctx.arc(x-3.5,y-7,1.6,0,7); ctx.arc(x+3.5,y-7,1.6,0,7); ctx.fill(); }
+  ctx.fillStyle='#e36f7a'; ctx.beginPath(); ctx.arc(x,y-4,1.3,0,7); ctx.fill();
+  ctx.strokeStyle='rgba(60,44,34,.5)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(x-2,y-3); ctx.lineTo(x-9,y-4); ctx.moveTo(x+2,y-3); ctx.lineTo(x+9,y-4); ctx.stroke();
+  // meow speech bubble
+  if(time<cat.meowUntil){
+    ctx.font='bold 13px Verdana,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    const w=ctx.measureText(cat.say).width+18, bx=x-w/2, by=y-42;
+    ctx.fillStyle='#fff8ec'; ctx.strokeStyle='#3a2c22'; ctx.lineWidth=2;
+    rr(bx,by,w,22,8); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-4,by+22); ctx.lineTo(x+4,by+22); ctx.lineTo(x,by+28); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle='#3a2c22'; ctx.fillText(cat.say,x,by+11);
+    ctx.textAlign='start'; ctx.textBaseline='alphabetic';
+  }
 }
 
 // ---------- hut ----------
@@ -626,9 +724,15 @@ const $=id=>document.getElementById(id);
 $('total').textContent=REGIONS.length; $('topicName').textContent=TOPIC;
 
 function interact(){
-  if(paused||!nearHut) return;
-  if(!keysFound.has(nearHut.reg.id)){ toast('🔒 The hut is locked — find the '+nearHut.reg.name+' key first.'); return; }
-  openCard(nearHut.reg);
+  if(paused) return;
+  if(nearHut){
+    if(!keysFound.has(nearHut.reg.id)){ toast('🔒 The hut is locked — find the '+nearHut.reg.name+' key first.'); return; }
+    openCard(nearHut.reg); return;
+  }
+  if(nearCat){
+    cat.say=['Meow!','Mrrp?','Purrr…','Mew!'][Math.floor(Math.random()*4)];
+    cat.meowUntil=time+1.6; return;
+  }
 }
 function openCard(reg){
   const card=reg.card, fresh=!collected.has(card.title);
@@ -665,12 +769,35 @@ function showToast(msg){ toast(msg); }
 
 function show(id){ $(id).classList.remove('hidden'); paused=true; }
 function hide(id){ $(id).classList.add('hidden'); if(noModal()) paused=false; }
-function noModal(){ return ['cardScrim','journalScrim','introScrim'].every(i=>$(i).classList.contains('hidden')); }
-function closeAll(){ ['cardScrim','journalScrim'].forEach(i=>$(i).classList.add('hidden')); if(noModal()) paused=false; }
+function noModal(){ return ['cardScrim','journalScrim','introScrim','congratsScrim'].every(i=>$(i).classList.contains('hidden')); }
+function closeAll(){ ['cardScrim','journalScrim'].forEach(i=>$(i).classList.add('hidden')); maybeCongrats(); if(noModal()) paused=false; }
 function darken(hex){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
   return `rgb(${Math.max(0,r-42)},${Math.max(0,g-42)},${Math.max(0,b-42)})`; }
 
-$('cardClose').onclick=()=>hide('cardScrim');
+$('cardClose').onclick=()=>{ hide('cardScrim'); maybeCongrats(); };
+
+function maybeCongrats(){
+  if(congratsShown || collected.size<REGIONS.length) return;
+  congratsShown=true;
+  $('congratsSub').textContent='All '+REGIONS.length+' cards collected';
+  $('congratsText').textContent='You explored every realm, found every hidden key, and gathered the complete set of '+TOPIC+' cards. The land is at peace — and the cat is purring.';
+  launchConfetti(); show('congratsScrim');
+}
+function launchConfetti(){
+  const layer=$('confetti'); layer.innerHTML='';
+  const colors=['#e8a33d','#4e8d3f','#3f7fb8','#c2603f','#e0a52e','#2f9e8f','#ec7aa0'];
+  for(let i=0;i<60;i++){ const s=document.createElement('i');
+    s.style.left=Math.random()*100+'%';
+    s.style.background=colors[i%colors.length];
+    s.style.animationDuration=(2.4+Math.random()*2)+'s';
+    s.style.animationDelay=(Math.random()*0.8)+'s';
+    s.style.transform='rotate('+(Math.random()*360)+'deg)';
+    layer.appendChild(s);
+  }
+  setTimeout(()=>{ layer.innerHTML=''; },5200);
+}
+$('congratsClose').onclick=()=>hide('congratsScrim');
+$('congratsJournal').onclick=()=>{ hide('congratsScrim'); buildJournal(); show('journalScrim'); };
 $('journalBtn').onclick=toggleJournal;
 $('journalClose').onclick=()=>hide('journalScrim');
 $('introClose').onclick=()=>{ hide('introScrim');
