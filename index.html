@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Knowledge Realms — 2.5D</title>
-<!-- Three.js (global build, loaded before the game script) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
   :root{
@@ -43,7 +42,6 @@
   .btn.accent:active{box-shadow:0 0 0 var(--accent-dark);}
 
   .stage{position:relative;background:#9ed8f5;}
-  /* Three.js renders into this fixed-aspect box; UI overlays sit on top */
   #view{position:relative;width:100%;aspect-ratio:768/528;overflow:hidden;}
   #view canvas{display:block;width:100%;height:100%;}
 
@@ -216,9 +214,6 @@
 </div>
 
 <script>
-/* =====================================================================
-   1) CONTENT — unchanged from the 2D version
-   ===================================================================== */
 const TOPIC = "Renewable Energy";
 const REGIONS = [
   { id:'solar', col:0,row:0, name:'Sun Dunes', theme:'desert',
@@ -247,9 +242,6 @@ const REGIONS = [
       text:'The daily rise and fall of the tides drives underwater turbines. Tides are extremely predictable, which makes the output easy to plan around.' } },
 ];
 
-/* =====================================================================
-   2) WORLD BUILD — unchanged logic; produces terrain/huts/keyPoints/cat
-   ===================================================================== */
 const TILE=48, REG_W=16, REG_H=12, GRID_COLS=3, GRID_ROWS=2;
 const COLS=REG_W*GRID_COLS, ROWS=REG_H*GRID_ROWS;
 const WORLD_W=COLS*TILE, WORLD_H=ROWS*TILE;
@@ -340,9 +332,6 @@ for(let tries=0;tries<500;tries++){
   break;
 }
 
-/* =====================================================================
-   3) PLAYER + INPUT — unchanged
-   ===================================================================== */
 const player={ x:START.gx*TILE+12, y:START.gy*TILE+10, w:24, h:30, speed:182, dir:'down', moving:false, bob:0 };
 const keys={}; let paused=true, nearHut=null, nearCat=false, time=0, congratsShown=false;
 
@@ -363,9 +352,6 @@ document.querySelectorAll('.dpad button').forEach(b=>{
 });
 document.getElementById('actionBtn').addEventListener('click',interact);
 
-/* =====================================================================
-   4) UPDATE — unchanged (pixel-space movement / collision / proximity)
-   ===================================================================== */
 function update(dt){
   if(paused){ player.moving=false; return; }
   let dx=0,dy=0;
@@ -420,16 +406,11 @@ const collected=new Set();
 const keysFound=new Set();
 let currentRegion=null;
 
-/* =====================================================================
-   5) THREE.JS RENDERING LAYER (replaces the old 2D canvas drawing)
-      World units = 1 per tile. Ground is XZ, +Y up, north = -Z.
-   ===================================================================== */
 let scene, camera, renderer, sun, playerObj, catObj, camOffset, _v;
 const keyObjs={}, hutObjs=[], spinners=[];
 const themeHex={ desert:0xe6cf86, highlands:0x84c06a, wetland:0x4f9e6e,
                  volcanic:0x57514e, farmland:0xb5783f, coast:0xe7dab4 };
 
-// geometry + material caches (keep draw setup light)
 const _geo={}, _mat={};
 function gc(k,make){ return _geo[k]||(_geo[k]=make()); }
 function gBox(w,h,d){ return gc('b'+w+'_'+h+'_'+d, ()=>new THREE.BoxGeometry(w,h,d)); }
@@ -445,12 +426,12 @@ function setShadow(o,cast){ o.traverse(n=>{ if(n.isMesh){ n.castShadow=!!cast; n
 function init3D(){
   const view=document.getElementById('view');
   scene=new THREE.Scene();
-  const sky=new THREE.Color(0x9ed8f5);
+  const sky=new THREE.Color(0x86c4e0);
   scene.background=sky;
   scene.fog=new THREE.Fog(sky, 26, 62);
 
   camera=new THREE.PerspectiveCamera(50, view.clientWidth/view.clientHeight, 0.1, 220);
-  camOffset=new THREE.Vector3(0, 10.5, 10.5);   // ~45° downward, behind the player
+  camOffset=new THREE.Vector3(0, 10.5, 10.5);
   _v=new THREE.Vector3();
 
   renderer=new THREE.WebGLRenderer({antialias:true});
@@ -458,11 +439,13 @@ function init3D(){
   renderer.setSize(view.clientWidth, view.clientHeight);
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  if('outputEncoding' in renderer) renderer.outputEncoding=THREE.sRGBEncoding;
+  if('toneMapping' in renderer){ renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.92; }
   view.appendChild(renderer.domElement);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.62));
-  scene.add(new THREE.HemisphereLight(0xbfe3ff, 0x6b8f4e, 0.45));
-  sun=new THREE.DirectionalLight(0xfff2d8, 0.95);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.40));
+  scene.add(new THREE.HemisphereLight(0xbfe3ff, 0x6b8f4e, 0.30));
+  sun=new THREE.DirectionalLight(0xfff2d8, 0.75);
   sun.castShadow=true;
   sun.shadow.mapSize.set(2048,2048);
   const d=18;
@@ -472,13 +455,11 @@ function init3D(){
   sun.shadow.bias=-0.0004;
   scene.add(sun); scene.add(sun.target);
 
-  // horizon filler so there's no void under the world edges
-  const bg=new THREE.Mesh(new THREE.PlaneGeometry(400,400), M(0x86b56b));
+  const bg=new THREE.Mesh(new THREE.PlaneGeometry(400,400), M(0x6f9c57));
   bg.rotation.x=-Math.PI/2; bg.position.set(COLS/2,-0.2,ROWS/2); scene.add(bg);
 
   buildGround(); buildScenery(); buildHuts(); buildKeys(); buildCat(); buildPlayer();
 
-  // place camera immediately so the first frame is framed correctly
   camera.position.set(START.gx+camOffset.x, camOffset.y, START.gy+camOffset.z);
   camera.lookAt(START.gx, 0.6, START.gy);
 
@@ -493,7 +474,7 @@ function buildGround(){
     if(t===LIQUID){ hex = reg.theme==='volcanic'?0xe0531c:0x3f93cf; y=-0.16; }
     else if(t===PATH){ hex=0xd8bd86; }
     else { hex=themeHex[reg.theme]; }
-    tmp.setHex(hex).multiplyScalar(0.88+s*0.20);
+    tmp.setHex(hex).multiplyScalar(0.80+s*0.18);
     pos.push(c,y,r, c+1,y,r, c+1,y,r+1, c,y,r+1);
     for(let i=0;i<4;i++) col.push(tmp.r,tmp.g,tmp.b);
     idx.push(v,v+2,v+1, v,v+3,v+2); v+=4;
@@ -521,7 +502,6 @@ function buildScenery(){
   }
 }
 
-/* ---- procedural low-poly props ---- */
 function makeObstacle(theme,s){
   switch(theme){
     case 'desert':   return s>0.7 ? makeRock(0x9c8267) : makeCactus();
@@ -586,7 +566,6 @@ function makeDeco(theme,s){ const g=new THREE.Group();
   else { const fl=new THREE.Mesh(gCone(0.08,0.12,5),M(0xec7aa0)); fl.position.y=0.1; g.add(fl); }
   return g; }
 
-/* ---- text / bubble / halo sprites ---- */
 function makeTextSprite(text, fontpx, scale){
   const c=document.createElement('canvas'); c.width=c.height=128;
   const g=c.getContext('2d'); g.font=(fontpx||72)+'px serif'; g.textAlign='center'; g.textBaseline='middle';
@@ -724,9 +703,6 @@ function sync3D(dt){
 function onResize(){ const view=document.getElementById('view'); const w=view.clientWidth, h=view.clientHeight;
   if(!w||!h) return; camera.aspect=w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h); }
 
-/* =====================================================================
-   6) UI — unchanged (interact also triggers the cat meow)
-   ===================================================================== */
 const $=id=>document.getElementById(id);
 $('total').textContent=REGIONS.length; $('topicName').textContent=TOPIC;
 
@@ -805,9 +781,6 @@ function launchConfetti(){
 $('congratsClose').onclick=()=>hide('congratsScrim');
 $('congratsJournal').onclick=()=>{ hide('congratsScrim'); buildJournal(); show('journalScrim'); };
 
-/* =====================================================================
-   7) BOOT + LOOP
-   ===================================================================== */
 init3D();
 let last=performance.now();
 function loop(now){
